@@ -2,7 +2,7 @@ module;
 #include <vector>
 #include <functional>
 
-export module rooster.hooks;
+export module rooster:hooks;
 export namespace rooster {
 template<typename Type> class hook;
 template<typename Ret, typename... Args> class hook<Ret(Args...)>

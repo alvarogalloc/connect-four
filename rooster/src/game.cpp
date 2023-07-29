@@ -1,9 +1,9 @@
 module;
 #include <chrono>
-#include <iostream>
-export module rooster.game;
-export import ginseng;
-export import rooster.hooks;
+#include <functional>
+export module rooster:game;
+import :hooks;
+import ginseng;
 
 using namespace std::chrono_literals;
 export namespace rooster {
