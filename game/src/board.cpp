@@ -1,8 +1,8 @@
 module;
-#include <array>
-#include <cassert>
-#include <fmt/core.h>
 #include <ranges>// NOLINT
+#include <cassert>
+#include <array>
+#include <fmt/core.h>
 export module board;
 import centurion;
 
