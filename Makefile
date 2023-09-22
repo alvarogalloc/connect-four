@@ -12,6 +12,11 @@ lint:
 format:
 	clang-format -i game/src/*.cpp
 
+config:
+	cmake build
+
+build: config
+	cmake --build build
 
 # make format the default target
-.DEFAULT_GOAL := format
+.DEFAULT_GOAL := build

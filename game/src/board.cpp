@@ -1,8 +1,8 @@
 module;
-#include <ranges>// NOLINT
-#include <cassert>
 #include <array>
+#include <cassert>
 #include <fmt/core.h>
+#include <ranges>// NOLINT
 export module board;
 import centurion;
 
@@ -126,4 +126,4 @@ bool board::check_winner(const piece piece)
 
   return false;
 }
-void  board::reset() { std::fill(data.begin(), data.end(), piece::none); }
+void board::reset() { std::fill(data.begin(), data.end(), piece::none); }

@@ -83,7 +83,6 @@ void update_system(ginseng::database &reg)
         state.game_over = false;
         state.turn = turn_for::player1;
       }
-      
     };
 
     while (handler.poll()) {
