@@ -74,7 +74,7 @@ void update_system(ginseng::database &reg)
     };
 
     auto on_mouse_move = [&](const auto &event) {
-      input.mouse_pos = cen::fpoint{ static_cast<float>(event.x()), static_cast<float>(event.y()) };
+      input.mouse_pos = { event.x(), event.y() };
     };
 
     auto on_key_down = [&](const auto &event) {

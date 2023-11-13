@@ -1,18 +1,20 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "name": "rooster",
-  "description": "simple game utilities in modern c++",
+  "name": "connect-four",
   "version-string": "0.1",
+  "description": "connect four made with c++20 modules",
   "dependencies": [
+    "bext-ut",
     {
       "name": "imgui",
-      "features": ["sdl2-binding"]
+      "features": [
+        "sdl2-binding"
+      ]
     },
-    "bext-ut",
-    "spdlog",
-    "sdl2-mixer",
+    "sdl2",
     "sdl2-image",
+    "sdl2-mixer",
     "sdl2-ttf",
-    "sdl2"
+    "spdlog"
   ]
 }

@@ -5,6 +5,7 @@ module;
 #include <ranges>// NOLINT
 export module board;
 import centurion;
+import logging;
 
 
 export enum class piece { none, red, yellow };
@@ -19,7 +20,7 @@ export struct board
   void draw_pieces(cen::renderer_handle renderer) const;
   void put_piece(const piece piece, const std::uint8_t column);
   // when mouse over, draw a placeholder with a dimmed color
-  void draw_placeholder(cen::renderer_handle renderer, const cen::fpoint mouse_pos) const;
+  void draw_placeholder(cen::renderer_handle renderer, const cen::ipoint mouse_pos) const;
   bool check_winner(const piece piece);
   void reset();
 
@@ -71,9 +72,9 @@ void board::put_piece(const piece piece, const std::uint8_t column)
   }
 }
 
-void board::draw_placeholder(cen::renderer_handle renderer, const cen::fpoint mouse_pos) const
+void board::draw_placeholder(cen::renderer_handle renderer, const cen::ipoint mouse_pos) const
 {
-  const auto [x, y] = mouse_pos.as_i().get();
+  const auto [x, y] = mouse_pos.get();
   const auto column = x / cell_size;
   const auto row = y / cell_size;
   const auto index = static_cast<std::size_t>(row * columns + column);
@@ -84,45 +85,50 @@ void board::draw_placeholder(cen::renderer_handle renderer, const cen::fpoint mo
   renderer.fill_rect(guide_rect);
 }
 
+std::uint8_t search_left(std::size_t idx, std::span<piece> data, const piece piece)
+{
+  if (idx % board::columns != 0 && data[idx - 1] == piece) {
+    return 1 + search_left(idx - 1, data, piece);
+  } else
+    return 0;
+}
+
+std::uint8_t search_right(std::size_t idx, std::span<piece> data, const piece piece)
+{
+  if (idx % board::columns != board::columns - 1 && data[idx + 1] == piece) {
+    return 1 + search_right(idx + 1, data, piece);
+  } else
+    return 0;
+}
+
+std::uint8_t search_up(std::size_t idx, std::span<piece> data, const piece piece)
+{
+  if (idx / board::columns > 0 && data[idx - board::columns] == piece) {
+    return 1 + search_up(idx - board::columns, data, piece);
+  } else
+    return 0;
+}
+
+std::uint8_t search_down(std::size_t idx, std::span<piece> data, const piece piece)
+{
+  if (idx / board::columns < board::columns - 1 && data[idx + board::columns] == piece) {
+    return 1 + search_down(idx + board::columns, data, piece);
+  } else
+    return 0;
+}
+
 bool board::check_winner(const piece piece)
 {
-  std::uint8_t count_horizontal{ 0 };
-  std::uint8_t count_vertical{ 0 };
-  std::uint8_t count_diagonal{ 0 };
-  enum class direction : std::uint8_t { horizontal, vertical, diagonal };
-  auto get_neighbor = [](const int index, const direction dir, const bool forward) {
-    switch (dir) {
-    case direction::horizontal:
-      return index + (forward ? 1 : -1);
-    case direction::vertical:
-      return index + (forward ? board::columns : -board::columns);
-    case direction::diagonal:
-      return index + (forward ? board::columns + 1 : -board::columns - 1);
-    }
-  };
+
   for (auto &el : data | std::views::filter([&](const auto &e) { return e == piece; })) {
-    const auto index = std::distance(data.begin(), &el);
-    for (auto dir : { direction::horizontal, direction::vertical, direction::diagonal }) {
-      for (auto forward : { true, false }) {
-        auto neighbor = get_neighbor(int(index), dir, forward);
-        if (neighbor < 0 || size_t(neighbor) >= data.size()) { continue; }
-        if (data[std::size_t(neighbor)] == piece) {
-          switch (dir) {
-          case direction::horizontal:
-            count_horizontal++;
-            break;
-          case direction::vertical:
-            count_vertical++;
-            break;
-          case direction::diagonal:
-            count_diagonal++;
-            break;
-          }
-        }
-      }
-    }
+    // std::uint8_t count_vertical{ 0 };
+    // std::uint8_t count_diagonal{ 0 };
+    const auto index = static_cast<std::size_t>(std::distance(data.begin(), &el));
+    std::uint8_t count_horizontal = 1 + search_left(index, this->data, piece) + search_right(index, this->data, piece);
+    std::uint8_t count_vertical = 1 + search_down(index, this->data, piece) + search_up(index, this->data, piece);
+    logging::info("pieces in horizontal: {}, vertical: {}", count_horizontal, count_vertical);
   }
-  if (count_horizontal >= 3 || count_vertical >= 3 || count_diagonal >= 3) { return true; }
+
 
   return false;
 }
