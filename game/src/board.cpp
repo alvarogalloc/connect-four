@@ -2,7 +2,7 @@ module;
 #include <array>
 #include <cassert>
 #include <fmt/core.h>
-#include <ranges>// NOLINT
+#include <ranges> // NOLINT
 export module board;
 import centurion;
 import logging;
@@ -77,8 +77,7 @@ void board::draw_placeholder(cen::renderer_handle renderer, const cen::ipoint mo
   const auto [x, y] = mouse_pos.get();
   const auto column = x / cell_size;
   const auto row = y / cell_size;
-  const auto index = static_cast<std::size_t>(row * columns + column);
-  assert(index < data.size());
+  assert(row * columns + column < data.size());
   const cen::color guide_color{ 0, 255, 55, 100 };
   const cen::irect guide_rect{ column * cell_size, row * cell_size, cell_size, cell_size };
   renderer.set_color(guide_color);
@@ -117,16 +116,51 @@ std::uint8_t search_down(std::size_t idx, std::span<piece> data, const piece pie
     return 0;
 }
 
+// four more to go: up-right, up-left, down-right, down-left
+std::uint8_t search_up_right(std::size_t idx, std::span<piece> data, const piece piece){
+  // check column is not 6
+  if (idx % board::columns < 6 && data[idx - board::columns + 1] == piece) {
+    return 1 + search_up_right(idx - board::columns + 1, data, piece);
+  } else
+    return 0;
+}
+std::uint8_t search_up_left(std::size_t idx, std::span<piece> data, const piece piece){
+    // check column is not 0
+  if (idx % board::columns > 0 && data[idx - board::columns - 1] == piece) {
+    return 1 + search_up_left(idx - board::columns - 1, data, piece);
+  } else
+    return 0;
+}
+
+std::uint8_t search_down_right(std::size_t idx, std::span<piece> data, const piece piece){
+    // check column is not 6
+  if (idx % board::columns < 6 && data[idx + board::columns + 1] == piece) {
+    return 1 + search_down_right(idx + board::columns + 1, data, piece);
+  } else
+    return 0;
+}
+std::uint8_t search_down_left(std::size_t idx, std::span<piece> data, const piece piece){
+    // check column is not 0
+  if (idx % board::columns > 0 && data[idx + board::columns - 1] == piece) {
+    return 1 + search_down_right(idx + board::columns - 1, data, piece);
+  } else
+    return 0;
+}
+
 bool board::check_winner(const piece piece)
 {
 
   for (auto &el : data | std::views::filter([&](const auto &e) { return e == piece; })) {
-    // std::uint8_t count_vertical{ 0 };
-    // std::uint8_t count_diagonal{ 0 };
     const auto index = static_cast<std::size_t>(std::distance(data.begin(), &el));
+    // we start in 1 because we are counting the selected one
     std::uint8_t count_horizontal = 1 + search_left(index, this->data, piece) + search_right(index, this->data, piece);
     std::uint8_t count_vertical = 1 + search_down(index, this->data, piece) + search_up(index, this->data, piece);
-    logging::info("pieces in horizontal: {}, vertical: {}", count_horizontal, count_vertical);
+    std::uint8_t count_diagonal_down_to_up = 1 +search_down_left(index, data, piece)+ search_up_right(index, data, piece);
+    std::uint8_t count_diagonal_up_to_down = 1 +search_up_left(index, data, piece)+ search_down_right(index, data, piece);
+
+    if (count_horizontal >3 or count_vertical > 3 or count_diagonal_down_to_up > 3 or count_diagonal_up_to_down > 3){
+      return true;
+    }
   }
 
 

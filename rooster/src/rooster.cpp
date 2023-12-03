@@ -1,8 +1,10 @@
 module;
 #include <functional>
+#include <string>
 #include <vector>
 export module rooster;
 import ginseng;
+import centurion;
 
 template<typename Sig, typename... Args> class hook
 {
@@ -37,9 +39,27 @@ private:
   hook<func_type, ginseng::database &> m_hook_end;
   hook<func_type, ginseng::database &> m_hook_systems;
   gameflow m_gameflow;
+  ginseng::database m_registry;
+  cen::window m_window;
+  cen::renderer m_renderer;
+
+  void init_window()
+  {
+    m_registry.visit([&](ginseng::database::ent_id id, rooster::game_tag) {
+      m_registry.add_component(id, cen::window_handle{ m_window });
+      m_registry.add_component(id, cen::renderer_handle{ m_renderer });
+    });
+    m_renderer.set_blend_mode(cen::blend_mode::blend);
+    m_window.show();
+  }
 
 public:
-  ginseng::database m_registry;
+  game(const std::string &title, const cen::iarea window_size)
+    : m_window(title, window_size), m_renderer(m_window.make_renderer())
+  {}
+  ginseng::database &get_registry() { return m_registry; }
+  cen::window_handle get_window() { return cen::window_handle{ m_window }; }
+  cen::renderer_handle get_renderer() { return cen::renderer_handle{ m_renderer }; }
   game &add_setup_callback(func_type func)
   {
     m_hook_setup.connect(func);
@@ -62,9 +82,11 @@ public:
     auto game_entity = m_registry.create_entity();
     m_registry.add_component(game_entity, game_tag{});
     m_registry.add_component(game_entity, m_gameflow);
+    init_window();
     m_hook_setup.publish(m_registry);
     while (m_registry.get_component<gameflow>(game_entity) == gameflow::running) { m_hook_systems.publish(m_registry); }
     m_hook_end.publish(m_registry);
+    m_window.hide();
   }
 };
 

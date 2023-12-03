@@ -24,23 +24,30 @@ void render_system(ginseng::database &reg)
     auto &ren = reg.get_component<cen::renderer_handle>(id);
     auto &b = reg.get_component<board>(id);
     auto &state = reg.get_component<game_state>(id);
+    const auto [w, h] = ren.output_size();
 
     auto draw_gameover_screen = [&]() {
       assert(reg.has_component<cen::font>(id));
       auto &font = reg.get_component<cen::font>(id);
 
-      ren.clear_with(cen::colors::blue);
+      ren.set_color(cen::colors::blue);
+      const cen::irect message_box{ (w - (w * 3 / 4)) / 2, (h - (h * 2 / 3)) / 2, w * 3 / 4, h * 2 / 3 };
+      ren.fill_rect(message_box);
+      ren.set_color(cen::colors::white);
       const auto gameover_text = make_text(ren, font, "GAME OVER");
-      ren.render(gameover_text, cen::ipoint{ 100, 100 });
-      const auto text_winner = fmt::format("player{} wins", state.turn == turn_for::player1 ? '1' : '2');
+      ren.render(gameover_text, message_box.position() + cen::ipoint{ 30, 30 });
+      const auto text_winner = fmt::format("Player {} wins", state.turn == turn_for::player1 ? '1' : '2');
       const auto winner_text = make_text(ren, font, text_winner);
-      ren.render(winner_text, cen::ipoint{ 100, 150 });
+      ren.render(winner_text, message_box.position() + cen::ipoint{ 30, 80 });
+      const std::string text_reset = "R to restart";
+      const auto reset_text = make_text(ren, font, text_reset);
+      ren.render(reset_text, message_box.position() + cen::ipoint{ 30, 180 });
     };
+    ren.clear_with(cen::colors::white);
+    b.draw(ren);
     if (state.game_over) {
       draw_gameover_screen();
     } else {
-      ren.clear_with(cen::colors::white);
-      b.draw(ren);
       reg.visit([&](input_state &state) { b.draw_placeholder(ren, state.mouse_pos); });
     }
     ren.present();
@@ -73,9 +80,7 @@ void update_system(ginseng::database &reg)
       state.turn = state.turn == turn_for::player1 ? turn_for::player2 : turn_for::player1;
     };
 
-    auto on_mouse_move = [&](const auto &event) {
-      input.mouse_pos = { event.x(), event.y() };
-    };
+    auto on_mouse_move = [&](const auto &event) { input.mouse_pos = { event.x(), event.y() }; };
 
     auto on_key_down = [&](const auto &event) {
       if (event.pressed() and event.key() == cen::keycodes::r) {
@@ -105,21 +110,11 @@ int main(int, char *[])
   const cen::img img;// Init SDL_image
   const cen::ttf ttf;// Init SDL_ttf
   const cen::mix mix;// Init SDL_mixer
-  cen::window win{ "Game", cen::iarea{ 700, 600 } };
-  cen::renderer ren{ win.make_renderer() };
-  ren.set_blend_mode(cen::blend_mode::blend);
-  win.show();
-  rooster::game()
-    .add_setup_callback([&](ginseng::database &reg) {
-      reg.visit([&](ginseng::database::ent_id id, rooster::game_tag) {
-        reg.add_component(id, cen::window_handle{ win });
-        reg.add_component(id, cen::renderer_handle{ ren });
-      });
-    })
+
+  rooster::game("Game", cen::iarea{ 700, 600 })
     .add_setup_callback(startup)
     .add_system(update_system)
     .add_system(render_system)
     .run();
-  win.hide();
   return 0;
 }
