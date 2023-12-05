@@ -3,7 +3,7 @@ module;
 #include <chrono>
 #include <cstdint>
 #include <thread>
-export module time_utils;
+export module rooster:time_utils;
 
 export
 {

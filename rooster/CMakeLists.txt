@@ -27,7 +27,7 @@ target_sources(ginseng PUBLIC FILE_SET cxx_modules TYPE CXX_MODULES FILES
 
 
 add_library(rooster)
-file(GLOB MODULE_FILES src/rooster.cpp)
+file(GLOB MODULE_FILES src/rooster.cpp src/time_utils.cpp src/logging.cpp)
 target_sources(rooster PUBLIC FILE_SET cxx_modules TYPE CXX_MODULES FILES
                               ${MODULE_FILES})
 # target_precompile_headers(rooster PRIVATE <entt/entt.hpp>)

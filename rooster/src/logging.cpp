@@ -1,7 +1,7 @@
 module;
 #include <spdlog/spdlog.h>
 
-export module logging;
+export module rooster:logging;
 export namespace fmt {
 using fmt::format;
 }

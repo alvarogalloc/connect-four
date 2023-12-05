@@ -1,12 +1,10 @@
-#include <cassert>
+import ginseng;
+import centurion;
+import rooster;
 import board;
 import setup;
-import rooster;
-import ginseng;
-import time_utils;
-import centurion;
-import logging;
 #include <string_view>
+#include <cassert>
 
 auto make_text(cen::renderer_handle &ren,
   cen::font &font,
@@ -111,7 +109,7 @@ int main(int, char *[])
   const cen::ttf ttf;// Init SDL_ttf
   const cen::mix mix;// Init SDL_mixer
 
-  rooster::game("Game", cen::iarea{ 700, 600 })
+  rooster::game("Connect Four", cen::iarea{ 700, 600 })
     .add_setup_callback(startup)
     .add_system(update_system)
     .add_system(render_system)

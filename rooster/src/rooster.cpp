@@ -3,6 +3,8 @@ module;
 #include <string>
 #include <vector>
 export module rooster;
+export import :logging;
+export import :time_utils;
 import ginseng;
 import centurion;
 
@@ -78,12 +80,14 @@ public:
 
   void run()
   {
+    auto start = now();
     m_gameflow = gameflow::running;
     auto game_entity = m_registry.create_entity();
     m_registry.add_component(game_entity, game_tag{});
     m_registry.add_component(game_entity, m_gameflow);
     init_window();
     m_hook_setup.publish(m_registry);
+    logging::info("Time for startup {} ms", elapsed(start));
     while (m_registry.get_component<gameflow>(game_entity) == gameflow::running) { m_hook_systems.publish(m_registry); }
     m_hook_end.publish(m_registry);
     m_window.hide();

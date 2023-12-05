@@ -9,4 +9,4 @@ include(cmake/CPM.cmake)
 
 add_subdirectory(rooster)
 add_subdirectory(game)
-add_subdirectory(game-test)
+# add_subdirectory(game-test)

@@ -1,5 +1,5 @@
 # find modules (all files in src but main.cpp)
-set(MODULE_FILES  src/random.cpp src/time_utils.cpp src/board.cpp src/setup.cpp src/logging.cpp)
+set(MODULE_FILES src/board.cpp src/setup.cpp)
 
 add_library(gamelib)
 target_sources(gamelib PUBLIC FILE_SET cxx_modules TYPE CXX_MODULES FILES
