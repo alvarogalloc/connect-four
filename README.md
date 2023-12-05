@@ -4,7 +4,11 @@ This is a project aiming to use the c++ modules and get familiar with them. Plea
 
 If you want to run it, it is tested with clang 18 and cmake 3.27.8 and the ninja generator. Vcpkg is required to install the libraries although it can be disabled easily.
 
-### Acknowledgments
+### Libraries used in the project
 
-- Apples for making the [gineng](https://github.com/apples/ginseng) ecs, modularized in this project.
-- Albin Johansson for making the [centurion](https://github.com/albin-johansson/centurion) sdl2 modern wrapper, also modularized.
+- [ginseng](https://github.com/apples/ginseng): a simple ecs, modularized in this project.
+- [centurion](https://github.com/albin-johansson/centurion): a sdl2 modern wrapper, also modularized.
+- SDL2 used in centurion.
+- [spdlog](https://github.com/gabime/spdlog): a reliable logger library.
+- [{fmt}](https://github.com/fmtlib/fmt): the best formatting library.
+
