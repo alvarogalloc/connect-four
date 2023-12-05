@@ -4,6 +4,8 @@ This is a project aiming to use the c++ modules and get familiar with them. Plea
 
 If you want to run it, it is tested with clang 18 and cmake 3.27.8 and the ninja generator. Vcpkg is required to install the libraries although it can be disabled easily.
 
+PD. Do not enter game-test as no test has been made :|
+
 ### Libraries used in the project
 
 - [ginseng](https://github.com/apples/ginseng): a simple ecs, modularized in this project.
