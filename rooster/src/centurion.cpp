@@ -11,6 +11,10 @@ module;
 #include <iostream>
 #include <cassert>
 #include <iomanip>
+#include <chrono>
+#include <variant>
+#include <type_traits>
+#include <algorithm>
 
 #include <SDL.h>
 #include <SDL_mixer.h>
@@ -1378,7 +1382,7 @@ class pointer final
     assert(mPtr);
     return *mPtr;
   }
-  explicit operator bool() const noexcept { return mPtr != nullptr; }
+  explicit operator bool() const noexcept { return mPtr.get() != nullptr; }
                operator Type*() const noexcept { return get(); }
   template <typename BB = B, enable_for_owner<BB> = 0>
   [[nodiscard]] auto release() noexcept -> Type*

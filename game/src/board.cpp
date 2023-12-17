@@ -5,6 +5,7 @@ module;
 #include <ranges>// NOLINT
 export module board;
 import centurion;
+import rooster;
 
 
 export enum class piece { none, red, yellow };
@@ -44,8 +45,10 @@ void board::draw_grid(cen::renderer_handle renderer) const
 
 void board::draw_pieces(cen::renderer_handle renderer) const
 {
-  for (auto &piece : std::ranges::views::filter(data, [](const auto &piece) { return piece != piece::none; })) {
-    const auto index = std::distance(data.begin(), &piece);
+  const std::uint8_t cell_size = 100;
+  for (std::size_t index = 0; index < data.size(); ++index) {
+    const auto &piece = data[index];
+    if (piece == piece::none) { continue; }
     const auto x = (index % columns) * 100 + 50;
     const auto y = (index / columns) * 100 + 50;
     const auto color = piece == piece::red ? cen::colors::red : cen::colors::yellow;
@@ -62,7 +65,7 @@ void board::draw(cen::renderer_handle renderer) const
 
 void board::put_piece(const piece piece, const std::uint8_t column)
 {
-  for (std::uint8_t i = rows - 1; i >= 0; --i) {
+  for (std::uint8_t i = rows - 1; i <= rows - 1; --i) {
     const std::size_t index = i * columns + column;
     if (data[index] == piece::none) {
       data[index] = piece;
@@ -83,9 +86,10 @@ void board::draw_placeholder(cen::renderer_handle renderer, const cen::ipoint mo
   renderer.fill_rect(guide_rect);
 }
 
+// Checked
 std::uint8_t search_left(std::size_t idx, std::span<piece> data, const piece piece)
 {
-  if (idx % board::columns != 0 && data[idx - 1] == piece) {
+  if (idx % board::columns > 0 && data[idx - 1] == piece) {
     return 1 + search_left(idx - 1, data, piece);
   } else
     return 0;
@@ -93,7 +97,7 @@ std::uint8_t search_left(std::size_t idx, std::span<piece> data, const piece pie
 
 std::uint8_t search_right(std::size_t idx, std::span<piece> data, const piece piece)
 {
-  if (idx % board::columns != board::columns - 1 && data[idx + 1] == piece) {
+  if (idx % board::columns < board::columns - 1 && data[idx + 1] == piece) {
     return 1 + search_right(idx + 1, data, piece);
   } else
     return 0;
@@ -109,25 +113,24 @@ std::uint8_t search_up(std::size_t idx, std::span<piece> data, const piece piece
 
 std::uint8_t search_down(std::size_t idx, std::span<piece> data, const piece piece)
 {
-  if (idx / board::columns < board::columns - 1 && data[idx + board::columns] == piece) {
+  if (idx / board::columns < board::rows - 1 && data[idx + board::columns] == piece) {
     return 1 + search_down(idx + board::columns, data, piece);
   } else
     return 0;
 }
 
-// four more to go: up-right, up-left, down-right, down-left
 std::uint8_t search_up_right(std::size_t idx, std::span<piece> data, const piece piece)
 {
-  // check column is not 6
-  if (idx % board::columns < 6 && data[idx - board::columns + 1] == piece) {
+  // upright should avoid last column and first row
+  if (idx % board::columns < board::columns - 1 && idx / board::rows > 0 && data[idx - board::columns + 1] == piece) {
     return 1 + search_up_right(idx - board::columns + 1, data, piece);
   } else
     return 0;
 }
 std::uint8_t search_up_left(std::size_t idx, std::span<piece> data, const piece piece)
 {
-  // check column is not 0
-  if (idx % board::columns > 0 && data[idx - board::columns - 1] == piece) {
+  // upleft should avoid first column and first row
+  if (idx % board::columns > 0 && idx / board::columns > 0 && data[idx - board::columns - 1] == piece) {
     return 1 + search_up_left(idx - board::columns - 1, data, piece);
   } else
     return 0;
@@ -135,16 +138,17 @@ std::uint8_t search_up_left(std::size_t idx, std::span<piece> data, const piece 
 
 std::uint8_t search_down_right(std::size_t idx, std::span<piece> data, const piece piece)
 {
-  // check column is not 6
-  if (idx % board::columns < 6 && data[idx + board::columns + 1] == piece) {
+  // downright should avoid last column and last row
+  if (idx % board::columns < board::columns - 1 && idx / board::columns < board::rows - 1
+      && data[idx + board::columns + 1] == piece) {
     return 1 + search_down_right(idx + board::columns + 1, data, piece);
   } else
     return 0;
 }
 std::uint8_t search_down_left(std::size_t idx, std::span<piece> data, const piece piece)
 {
-  // check column is not 0
-  if (idx % board::columns > 0 && data[idx + board::columns - 1] == piece) {
+  // downright should avoid first column and last row
+  if (idx % board::columns > 0 && idx / board::columns < board::rows - 1 && data[idx + board::columns - 1] == piece) {
     return 1 + search_down_right(idx + board::columns - 1, data, piece);
   } else
     return 0;
@@ -152,9 +156,8 @@ std::uint8_t search_down_left(std::size_t idx, std::span<piece> data, const piec
 
 bool board::check_winner(const piece piece)
 {
-
-  for (auto &el : data | std::views::filter([&](const auto &e) { return e == piece; })) {
-    const auto index = static_cast<std::size_t>(std::distance(data.begin(), &el));
+  for (std::size_t index = 0; index < data.size(); ++index) {
+    if (data[index] != piece) { continue; }
     // we start in 1 because we are counting the selected one
     std::uint8_t count_horizontal = 1 + search_left(index, this->data, piece) + search_right(index, this->data, piece);
     std::uint8_t count_vertical = 1 + search_down(index, this->data, piece) + search_up(index, this->data, piece);

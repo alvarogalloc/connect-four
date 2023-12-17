@@ -5,13 +5,15 @@ endif()
 
 # enable c++20 modules api
 # turn on the experimental API
-set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API
-    "aa1f7df0-828a-4fcd-9afc-2dc80491aca7")
-set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
-set(CMAKE_CXX_EXTENSIONS OFF)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  message(FATAL_ERROR "There is not yet support for modules in gcc ")
+if(CMAKE_VERSION VERSION_LESS_EQUAL "3.27.0")
+  set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API
+      "aa1f7df0-828a-4fcd-9afc-2dc80491aca7")
+  set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(FATAL_ERROR "There is not yet support for modules in gcc ")
+  endif()
 endif()
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 
 # Add project_options from https://github.com/aminya/project_options Change the
