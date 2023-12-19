@@ -1,5 +1,3 @@
-import ginseng;
-import centurion;
 import rooster;
 import board;
 import setup;

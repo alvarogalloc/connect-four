@@ -3,6 +3,7 @@ module;
 #include <cassert>
 #include <fmt/core.h>
 #include <ranges>// NOLINT
+#include <algorithm>
 export module board;
 import centurion;
 import rooster;
@@ -45,12 +46,11 @@ void board::draw_grid(cen::renderer_handle renderer) const
 
 void board::draw_pieces(cen::renderer_handle renderer) const
 {
-  const std::uint8_t cell_size = 100;
   for (std::size_t index = 0; index < data.size(); ++index) {
     const auto &piece = data[index];
     if (piece == piece::none) { continue; }
-    const auto x = (index % columns) * 100 + 50;
-    const auto y = (index / columns) * 100 + 50;
+    const auto x = (index % columns) * cell_size + 50;
+    const auto y = (index / columns) * cell_size + 50;
     const auto color = piece == piece::red ? cen::colors::red : cen::colors::yellow;
     renderer.set_color(color);
     renderer.fill_circle(cen::ipoint{ static_cast<int>(x), static_cast<int>(y) }, 45);

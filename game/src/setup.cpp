@@ -1,8 +1,6 @@
 module;
 #include <string>
 export module setup;
-import centurion;
-import ginseng;
 import rooster;
 import board;
 

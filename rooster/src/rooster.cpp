@@ -5,8 +5,8 @@ module;
 export module rooster;
 export import :logging;
 export import :time_utils;
-import ginseng;
-import centurion;
+export import ginseng;
+export import centurion;
 
 template<typename Sig, typename... Args> class hook
 {
